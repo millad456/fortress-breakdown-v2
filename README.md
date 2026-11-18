@@ -14,7 +14,7 @@ Built with [three.js](https://threejs.org) r170 and [Vite](https://vitejs.dev). 
 npm install
 npm run dev        # http://localhost:5173/#/dubrovnik
 npm run build      # static site in dist/
-npm run preview    # serve dist/ on http://localhost:4173
+npm run preview    # serve dist/ on http://localhost:4180
 ```
 
 Add `?q=medium` to the hash URL (`#/dubrovnik?q=medium`) to force the lighter quality tier, or `?nointro` to skip the intro. Narrow screens and phones get the medium tier automatically.
