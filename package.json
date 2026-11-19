@@ -11,7 +11,8 @@
     "build-geo": "node scripts/build-geo.mjs",
     "plot": "node scripts/plot-geo.mjs",
     "test": "node scripts/test-geo.mjs && node scripts/test-fire.mjs",
-    "shots": "node scripts/shots.mjs"
+    "shots": "node scripts/shots.mjs",
+    "mobile": "node scripts/mobile.mjs"
   },
   "dependencies": {
     "three": "0.170.0"

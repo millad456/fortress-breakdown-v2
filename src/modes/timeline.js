@@ -197,12 +197,12 @@ export class TimelineMode {
     const ticks = [800, 1000, 1200, 1400, 1600, 1800, 2000].map((y) => `<span class="tl-tick" style="left:${pct(y)}%">${y}</span>`).join('');
     return `
       <div class="tl">
-        <div class="tl-head">
+        <div class="tl-head dock-keep">
           <button class="btn tl-play" aria-pressed="false">Play</button>
           <span class="tl-year" aria-live="polite"></span>
           <span class="tl-note">House dates are a modelled estimate</span>
         </div>
-        <div class="tl-track">
+        <div class="tl-track dock-keep">
           <input class="tl-slider" type="range" min="${Y0}" max="${Y1}" step="1" value="${Math.round(this.year)}" aria-label="Year">
           <div class="tl-marks">${marks}</div>
           <div class="tl-ticks">${ticks}</div>

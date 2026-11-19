@@ -64,7 +64,7 @@ export class AnatomyMode {
     return `
       <div class="dock-row">
         <div class="dock-text">
-          <h3>Anatomy of the defences</h3>
+          <h3 class="dock-keep">Anatomy of the defences</h3>
           <p>Walls coloured by how thick they are. The land front, facing the only approach an army could take, is the thickest; on the sea cliffs the water does most of the work.</p>
           <ul class="legend">${items}</ul>
         </div>

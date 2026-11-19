@@ -19,6 +19,8 @@ npm run preview    # serve dist/ on http://localhost:4180
 
 Add `?q=medium` to the hash URL (`#/dubrovnik?q=medium`) to force the lighter quality tier, or `?nointro` to skip the intro. Narrow screens and phones get the medium tier automatically.
 
+**Phones.** The place panel is a bottom sheet; every card (place panel, mode controls, tour) has a minimize control: the grab bar on top of a card, or ▾ on the panel. Minimized cards keep their essentials (title, Play and year, Pause/Stop, tour arrows).
+
 **Keys:** `1`–`5` modes · `N` night · `L` list of places · `Esc` close · `←` `→` step the tour. Double-click the ground to fly there; click a wall or tower to open it.
 
 ## Checks
@@ -28,6 +30,8 @@ npm test               # geo.json checks (size, closed clockwise ring through al
                        # + fields of fire: no fan covers the town, every tower/fort/bastion has a fan
 npm run shots          # headless screenshots of every place, mode, year, diorama, replay and layout
                        # (needs `npm run dev` running; prints "Console issues: none" when clean)
+npm run mobile         # phone layouts (390×844, 375×667, 844×390): no overlaps, every card
+                       # minimizes, minimized cards cover under 30% of the screen
 node scripts/check-photos.mjs   # every photo exists on Wikimedia Commons
 ```
 

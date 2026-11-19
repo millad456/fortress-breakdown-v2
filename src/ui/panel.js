@@ -18,7 +18,10 @@ export function panelHTML(f) {
   return `
     <div class="panel-head">
       <p class="era">${esc(f.era)}</p>
-      <button class="icon-btn panel-close" aria-label="Close panel (Esc)">✕</button>
+      <span class="panel-btns">
+        <button class="icon-btn panel-min" data-min="panel" aria-expanded="true" aria-label="Minimize" title="Minimize"><span aria-hidden="true">▾</span></button>
+        <button class="icon-btn panel-close" aria-label="Close panel (Esc)">✕</button>
+      </span>
     </div>
     <h2>${esc(f.name)}</h2>
     <p class="sub">${esc(f.subtitle)}</p>

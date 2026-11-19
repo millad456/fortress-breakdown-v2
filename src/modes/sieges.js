@@ -60,15 +60,15 @@ export class SiegesMode {
 
   dock() {
     if (!this.current) {
-      return `<div class="dock-text"><h3>Sieges</h3><p>Three times the city was cut off and fired on. Choose one to replay it.</p>
+      return `<div class="dock-text"><h3 class="dock-keep">Sieges</h3><p>Three times the city was cut off and fired on. Choose one to replay it.</p>
         <div class="sg-list">${this.list.map((s) => `<button class="sg-pick" data-id="${esc(s.id)}"><b>${esc(s.name)}</b><span>${esc(s.years)} · ${esc(s.attacker)}</span></button>`).join('')}</div></div>`;
     }
     const s = this.current;
     this.lastBeat = null;
     return `<div class="sg">
-      <div class="sg-head"><div><p class="tl-when">${esc(s.years)} · ${esc(s.attacker)}</p><h3>${esc(s.name)}</h3></div>
+      <div class="sg-head dock-keep"><div><p class="tl-when">${esc(s.years)} · ${esc(s.attacker)}</p><h3>${esc(s.name)}</h3></div>
         <div class="sg-ctl"><button class="btn small sg-pause">Pause</button><button class="btn small sg-stop">Stop</button></div></div>
-      <div class="sg-bar" role="progressbar" aria-label="Replay progress"><span></span></div>
+      <div class="sg-bar dock-keep" role="progressbar" aria-label="Replay progress"><span></span></div>
       <div class="sg-beat"></div>
       <div class="chips">${s.stats.map((x) => `<span class="chip"><b>${esc(x.value)}</b> ${esc(x.label)}</span>`).join('')}</div>
       <p class="sg-sum">${esc(s.outcome)}</p>

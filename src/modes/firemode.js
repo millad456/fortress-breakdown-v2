@@ -42,7 +42,7 @@ export class FireMode {
     const items = Object.values(this.cfg.classes).map((c) => `<li><i style="background:${c.color}"></i>${esc(c.label)}</li>`).join('');
     return `
       <div class="dock-text">
-        <h3>Fields of fire</h3>
+        <h3 class="dock-keep">Fields of fire</h3>
         <p>The ground each work could really cover, computed from the plan: rays every 3° out to each gun’s range, stopping at the town or where the ground rises above what the guns could reach.</p>
         <ul class="legend">${items}<li><i class="dash"></i>Harbour mouth, closed at night</li></ul>
       </div>`;

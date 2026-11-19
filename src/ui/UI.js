@@ -21,6 +21,9 @@ const MODES = [
 const KIND_ICON = { tower: '◖', fort: '◆', gate: '⌂', wall: '▬', place: '●' };
 const fmtHour = (h) => `${String(Math.floor(h)).padStart(2, '0')}:${String(Math.round((h % 1) * 60) % 60).padStart(2, '0')}`;
 const NARROW = 760;
+const SHORT = 520;
+/** a full-width grab bar that minimizes / expands the card it heads */
+const GRAB = (k) => `<button class="grab" data-min="${k}" aria-expanded="true" aria-label="Minimize" title="Minimize"><span aria-hidden="true"></span></button>`;
 
 export class UI {
   constructor(root, engine, world, content) {
@@ -87,7 +90,7 @@ export class UI {
         <p class="list-foot">${esc(m.credit)}</p>
       </aside>
       <aside class="panel" aria-label="Place details" aria-hidden="true"><div class="panel-body"></div></aside>
-      <section class="dock" aria-live="polite"><div class="dock-tour"></div><div class="dock-card"></div></section>
+      <section class="dock" aria-live="polite"><div class="dock-tour"></div><div class="dock-card">${GRAB('dock')}<div class="dock-inner"></div><p class="dock-min-label"></p></div></section>
       <div class="toast" role="status"></div>
       <div class="intro-ov" aria-hidden="true">
         <div class="intro-text">
@@ -104,7 +107,7 @@ export class UI {
     this.root.appendChild(el);
     this.el = el;
     const q = (s) => el.querySelector(s);
-    this.$ = { topbar: q('.topbar'), list: q('.list'), panel: q('.panel'), panelBody: q('.panel-body'), dock: q('.dock'), dockCard: q('.dock-card'), dockTour: q('.dock-tour'), toast: q('.toast'), intro: q('.intro-ov'), lb: q('.lightbox'), tod: q('.tod input'), todVal: q('.tod-val') };
+    this.$ = { topbar: q('.topbar'), list: q('.list'), panel: q('.panel'), panelBody: q('.panel-body'), dock: q('.dock'), dockBox: q('.dock-card'), dockCard: q('.dock-inner'), dockTour: q('.dock-tour'), toast: q('.toast'), intro: q('.intro-ov'), lb: q('.lightbox'), tod: q('.tod input'), todVal: q('.tod-val') };
 
     el.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => this.setMode(b.dataset.mode)));
     this.$.tod.addEventListener('input', (e) => this.engine.setTime(+e.target.value));
@@ -117,6 +120,12 @@ export class UI {
       b.addEventListener('pointerleave', () => this.hoverPlace(null));
       b.addEventListener('focus', () => this.hoverPlace(b.dataset.id));
       b.addEventListener('blur', () => this.hoverPlace(null));
+    });
+    // minimize / expand any card; a minimized panel also expands when its title is tapped
+    el.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-min]');
+      if (b) return this.setMin(b.dataset.min, b.getAttribute('aria-expanded') === 'true');
+      if (this.panelMin && e.target.closest('.panel h2, .panel .era')) this.setMin('panel', false);
     });
     this.$.panel.addEventListener('click', (e) => {
       if (e.target.closest('.panel-close')) this.closePanel();
@@ -139,14 +148,58 @@ export class UI {
   // ------------------------------------------------------------------ layout: no element overlaps another
   layout() {
     const narrow = window.innerWidth < NARROW;
-    this.root.classList.toggle('narrow', narrow);
+    // phones held sideways: wide but short, so cards get less height
+    const short = !narrow && window.innerHeight < SHORT;
+    const rc = this.root.classList;
+    rc.toggle('narrow', narrow);
+    rc.toggle('short', short);
     if (narrow && this.listOpen && this.selected) this.listOpen = false;
-    this.root.classList.toggle('list-open', !!this.listOpen);
-    this.root.classList.toggle('panel-open', !!this.selected);
+    rc.toggle('list-open', !!this.listOpen);
+    rc.toggle('panel-open', !!this.selected);
+    rc.toggle('sheet-min', !!(this.selected && this.panelMin));
     this.el.querySelector('.list-btn').setAttribute('aria-pressed', String(!!this.listOpen));
     this.$.panel.setAttribute('aria-hidden', String(!this.selected));
+    this.$.panel.classList.toggle('min', !!this.panelMin);
+    this.$.dockBox.classList.toggle('min', !!this.dockMin);
+    this.$.dockTour.querySelector('.tour')?.classList.toggle('min', !!this.tourMin);
+    for (const [k, v] of [['panel', this.panelMin], ['dock', this.dockMin], ['tour', this.tourMin]]) {
+      this.el.querySelectorAll(`[data-min="${k}"]`).forEach((b) => {
+        b.setAttribute('aria-expanded', String(!v));
+        b.setAttribute('aria-label', v ? 'Expand' : 'Minimize');
+        b.title = v ? 'Expand' : 'Minimize';
+      });
+    }
+    this.el.querySelector('.dock-min-label').textContent = MODES.find((x) => x.id === this.mode)?.label || '';
     const tb = this.$.topbar.getBoundingClientRect().height;
-    this.root.style.setProperty('--topbar', `${Math.ceil(tb)}px`);
+    const st = this.root.style;
+    st.setProperty('--topbar', `${Math.ceil(tb)}px`);
+    // phone sheets: the place panel sits at the bottom, under the tour card (which moves to the top);
+    // when the panel is minimized the dock sits just above it
+    st.removeProperty('--sheet-top');
+    st.removeProperty('--dock-bottom');
+    if (narrow && this.selected) {
+      const tour = this.$.dockTour.querySelector('.tour');
+      const top = tour && !this.panelMin ? tour.getBoundingClientRect().bottom : tb;
+      st.setProperty('--sheet-top', `${Math.ceil(top)}px`);
+      // offsetHeight, not the bounding box: the sheet may still be sliding in
+      if (this.panelMin) st.setProperty('--dock-bottom', `${this.$.panel.offsetHeight + parseFloat(getComputedStyle(this.$.panel).bottom)}px`);
+    }
+  }
+
+  /** minimize (true) or expand (false) a card: 'panel', 'dock' or 'tour' */
+  setMin(which, v) {
+    if (which === 'panel') this.panelMin = v;
+    else if (which === 'dock') this.dockMin = v;
+    else if (which === 'tour') this.tourMin = v;
+    this.layout();
+  }
+
+  setDockMin(v) {
+    this.setMin('dock', v);
+  }
+
+  get compact() {
+    return window.innerWidth < NARROW || window.innerHeight < SHORT;
   }
 
   blockerRects() {
@@ -186,10 +239,11 @@ export class UI {
     for (const it of this.labels.items) it.el.classList.toggle('hover', it.id === id);
   }
 
-  openPlace(id, { fly = true } = {}) {
+  openPlace(id, { fly = true, min = false } = {}) {
     const f = this.byId[id];
     if (!f) return;
     this.selected = id;
+    this.panelMin = min;
     this.highlight.setSelected(id);
     this.labels.setActive(id);
     this.$.panelBody.innerHTML = panelHTML(f);
@@ -270,12 +324,13 @@ export class UI {
       this.$.dockCard.innerHTML = `
         <div class="dock-row explore">
           <p class="hint"><b>Drag</b> to orbit · <b>right-drag</b> to pan · <b>scroll</b> to zoom · <b>double-click</b> to fly there · <b>click</b> a wall or tower to open it</p>
-          <div class="dock-btns"><button class="btn small go-home">Overview</button><button class="btn small go-plan">Plan</button><button class="btn small go-night">Night</button></div>
+          <div class="dock-btns dock-keep"><button class="btn small go-home">Overview</button><button class="btn small go-plan">Plan</button><button class="btn small go-night">Night</button></div>
         </div>`;
       this.$.dockCard.querySelector('.go-home').addEventListener('click', () => this.fly(this.sc.HOME));
       this.$.dockCard.querySelector('.go-plan').addEventListener('click', () => this.fly(this.sc.POSES.plan));
       this.$.dockCard.querySelector('.go-night').addEventListener('click', () => this.toggleNight());
     }
+    this.layout();
   }
 
   watchReplay(siegeId) {
@@ -416,6 +471,9 @@ export class UI {
   // ------------------------------------------------------------------ tour
   startTour() {
     this.tourIndex = 0;
+    this.tourMin = false;
+    // on small screens the tour card is the main thing: start the mode controls minimized
+    if (this.compact) this.dockMin = true;
     this.el.querySelector('.tour-btn').textContent = 'End tour';
     this.root.classList.add('touring');
     this.tourStep(0);
@@ -426,6 +484,7 @@ export class UI {
     this.$.dockTour.innerHTML = '';
     this.el.querySelector('.tour-btn').textContent = 'Guided tour';
     this.root.classList.remove('touring');
+    this.layout();
   }
 
   tourStep(i) {
@@ -435,7 +494,7 @@ export class UI {
     const s = stops[i];
     if (s.mode !== 'sieges' && this.mode === 'sieges') this.modes.sieges.stop(false);
     this.setMode(s.mode, { year: s.year, siege: s.siege, fly: !s.pose && !s.feature });
-    if (s.feature) this.openPlace(s.feature);
+    if (s.feature) this.openPlace(s.feature, { min: this.compact });
     else {
       if (this.selected) this.closePanel();
       if (s.pose) this.fly(this.sc.POSES[s.pose]);
@@ -443,7 +502,7 @@ export class UI {
     if (s.hour) this.engine.setTime(s.hour);
     else if (s.mode !== 'sieges' && s.mode !== 'timeline' && this.engine.night > 0.5) this.engine.setTime(10);
     this.$.dockTour.innerHTML = `
-      <div class="tour">
+      <div class="tour">${GRAB('tour')}
         <div class="tour-text"><p class="tl-when">Guided tour · ${i + 1} / ${stops.length}</p><h3>${esc(s.title)}</h3><p>${esc(s.text)}</p></div>
         <div class="tour-nav">
           <button class="icon-btn tour-prev" aria-label="Previous stop (←)" ${i === 0 ? 'disabled' : ''}>←</button>
@@ -454,6 +513,7 @@ export class UI {
     this.$.dockTour.querySelector('.tour-prev').addEventListener('click', () => this.tourStep(i - 1));
     this.$.dockTour.querySelector('.tour-next').addEventListener('click', () => this.tourStep(i + 1));
     this.$.dockTour.querySelector('.tour-end').addEventListener('click', () => this.endTour());
+    this.layout();
   }
 
   dispose() {

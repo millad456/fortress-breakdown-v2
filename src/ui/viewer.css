@@ -174,7 +174,7 @@
 .narrow .tod input { flex: 1; width: auto; }
 .narrow .tour-btn { margin-left: auto; }
 .narrow .list, .narrow .panel { left: var(--gap); right: var(--gap); width: auto; }
-.narrow.list-open .dock, .narrow.panel-open .dock { visibility: hidden; opacity: 0; }
+.narrow.list-open .dock { visibility: hidden; opacity: 0; }
 .narrow.list-open .toast, .narrow.panel-open .toast { left: var(--gap); right: var(--gap); }
 .narrow .dock { left: var(--gap) !important; right: var(--gap) !important; }
 .narrow .dock-row { flex-direction: column; align-items: stretch; gap: 10px; }
@@ -187,6 +187,70 @@
 .narrow .hint { font-size: 12px; text-align: center; }
 .narrow .dock-card { max-height: 44vh; overflow: auto; }
 .narrow .tour { flex-direction: column; align-items: stretch; }
+.narrow .tour.min { flex-direction: row; align-items: center; }
+
+/* phones: the place panel is a bottom sheet, so the model stays in view above it */
+.narrow .panel { top: auto; bottom: var(--gap); height: min(60vh, calc(100% - var(--sheet-top, var(--topbar)) - 2 * var(--gap))); transform: translateY(calc(100% + 2 * var(--gap))); border-radius: var(--radius) var(--radius) calc(var(--radius) - 4px) calc(var(--radius) - 4px); }
+.narrow.panel-open .panel { transform: none; }
+.narrow .panel.min { height: auto; bottom: var(--gap); }
+.narrow .panel h2 { font-size: 28px; }
+.narrow .panel-body { padding: 12px 16px 20px; }
+/* with the sheet open the tour card moves to the top and the mode controls step aside;
+   with the sheet minimized the dock sits just above it */
+.narrow.panel-open:not(.sheet-min) .dock { top: calc(var(--topbar) + var(--gap)); bottom: auto; }
+.narrow.panel-open:not(.sheet-min) .dock-card { display: none; }
+.narrow.sheet-min .dock { bottom: calc(var(--dock-bottom, 0px) + var(--gap)); }
+/* touring on a phone with a place open: the tour card and the sheet are enough */
+.narrow.touring.panel-open .dock-card { display: none; }
+
+/* phones held sideways: short screens get a narrower panel and cards that scroll */
+.short { --gap: 10px; --panel-w: min(360px, 46vw); --list-w: min(250px, 34vw); }
+.short .topbar { min-height: 0; padding: 6px 12px; }
+.short .panel h2 { font-size: 26px; }
+.short .panel-body { padding: 12px 16px 18px; }
+.short .dock-card { max-height: calc(100vh - var(--topbar) - 3 * var(--gap)); overflow: auto; }
+.short .tl-note { display: none; }
+
+/* ---------- minimize: every card can fold down to its essentials ---------- */
+.dock-card, .tour { position: relative; }
+.dock-card { padding-top: 20px; }
+.dock-tour .tour { padding-top: 20px; }
+.grab { position: absolute; top: 0; left: 0; right: 0; height: 18px; padding: 0; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; border-radius: var(--radius) var(--radius) 0 0; }
+.grab span { position: relative; width: 36px; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.3); transition: background 0.2s; }
+.grab span::after { content: '▾'; position: absolute; left: 42px; top: -7px; font-size: 11px; line-height: 1; color: var(--ink-3); }
+.grab[aria-expanded='false'] span::after { content: '▴'; }
+.grab:hover span, .grab:focus-visible span { background: var(--gold); }
+.grab:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+@media (pointer: coarse) { .grab { height: 24px; } .dock-card, .dock-tour .tour { padding-top: 24px; } }
+
+.dock-min-label { display: none; margin: 0; font-family: var(--serif); font-size: 17px; font-weight: 600; }
+.dock-card.min { padding-top: 16px; padding-bottom: 8px; overflow: visible; max-height: none; }
+.dock-card.min:not(:has(.dock-keep)) .dock-min-label { display: block; }
+.dock-card.min .dock-inner :not(.dock-keep):not(:has(.dock-keep)):not(.dock-keep *) { display: none !important; }
+.dock-card.min .dock-inner h3.dock-keep { margin: 0; font-size: 17px; }
+.dock-card.min .dock-row { gap: 0; }
+.dock-card.min .tl { display: flex; align-items: center; gap: 16px; }
+.dock-card.min .tl-head { flex: none; gap: 10px; }
+.dock-card.min .tl-year { font-size: 24px; }
+.dock-card.min .tl-track { flex: 1; margin: 2px 4px 16px; }
+.dock-card.min .tl-marks { display: none !important; }
+.dock-card.min .sg-bar { margin-bottom: 0; }
+.dock-card.min .sg-head h3 { font-size: 17px; margin: 0; }
+.dock-card.min .sg-head .tl-when { font-size: 10px; }
+
+.dock-tour .tour.min { padding-top: 16px; padding-bottom: 8px; }
+.tour.min .tour-text > p:not(.tl-when) { display: none; }
+.tour.min h3 { font-size: 16px; margin: 0; }
+.tour.min .tl-when { font-size: 10px; }
+
+.panel-btns { display: flex; gap: 6px; }
+.panel .panel-min span { display: inline-block; transition: transform 0.2s; }
+.panel.min .panel-min span { transform: rotate(180deg); }
+.panel.min { bottom: auto; overflow: hidden; }
+.panel.min .panel-body > :not(.panel-head):not(h2) { display: none; }
+.panel.min h2 { font-size: 22px; margin: 4px 0 0; cursor: pointer; }
+.panel.min .era { cursor: pointer; }
+.panel.min .panel-body { padding-bottom: 14px; }
 
 @media (prefers-reduced-motion: reduce) {
   * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
